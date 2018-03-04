@@ -12,6 +12,13 @@ class ViewController: UIViewController {
     var isTurned = false
     var frontView = UIView()
     var backView = UIView()
+    let words = [
+        WordPair(wordToLearn: "snadi", translation: "pieni"),
+        WordPair(wordToLearn: "buli", translation:"iso"),
+        WordPair(wordToLearn: "gimis", translation:"kiva"),
+        WordPair(wordToLearn: "kelju", translation:"huono")
+    ]
+    var wordIndex = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,7 +27,7 @@ class ViewController: UIViewController {
         frontView.backgroundColor = UIColor.white
         
         let labelFront = UILabel()
-        labelFront.text = "snadi".uppercased()
+        labelFront.text = words[wordIndex].wordToLearn.uppercased()
         labelFront.textColor = UIColor.black
         labelFront.font = UIFont.boldSystemFont(ofSize: 30)
         
@@ -29,15 +36,17 @@ class ViewController: UIViewController {
         backView.backgroundColor = UIColor.white
         
         let labelBack = UILabel(frame: CGRect(x: 70, y: 70, width: 100, height: 100))
-        labelBack.text = "pieni".uppercased()
+        labelBack.text = words[wordIndex].translation.uppercased()
         labelBack.textColor = UIColor.black
         labelBack.font = UIFont.boldSystemFont(ofSize: 30)
         
         
-        frontView.addGestureRecognizer(UITapGestureRecognizer(target:self, action: #selector(handleTap(sender:))))
-        
-        backView.addGestureRecognizer(UITapGestureRecognizer(target:self, action: #selector(handleTap(sender:))))
-        
+        frontView.addGestureRecognizer(UITapGestureRecognizer(target:self, action: #selector(handleTap(recognizer:))))
+        backView.addGestureRecognizer(UITapGestureRecognizer(target:self, action: #selector(handleTap(recognizer:))))
+        frontView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleSwipe(recognizer:))))
+        backView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handleSwipe(recognizer:))))
+        backView.isHidden = true
+
         self.view.addSubview(backView)
         self.view.addSubview(frontView)
         frontView.addSubview(labelFront)
@@ -62,7 +71,24 @@ class ViewController: UIViewController {
         
     }
     
-    @objc func handleTap(sender: UITapGestureRecognizer) {
+    @objc func handleSwipe(recognizer: UIPanGestureRecognizer) {
+        let underView = isTurned ? frontView : backView
+        let translation = recognizer.translation(in: self.view)
+        let state = recognizer.state.rawValue
+        if (state < 3) {
+            if let view = recognizer.view {
+                view.center = CGPoint(x:view.center.x + translation.x, y:view.center.y + translation.y)
+                underView.center = CGPoint(x:view.center.x + translation.x, y:view.center.y + translation.y)
+            }
+            recognizer.setTranslation(CGPoint.zero, in: self.view)
+        } else if(state == 3) {
+            frontView.center = CGPoint(x:view.center.x, y:view.center.y)
+            backView.center = CGPoint(x:view.center.x, y:view.center.y)
+            recognizer.setTranslation(CGPoint.zero, in: self.view)
+        }
+    }
+    
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {
         let toView = isTurned ? frontView : backView
         let fromView = isTurned ? backView : frontView
         UIView.transition(from: fromView, to: toView, duration: 0.3, options: [.transitionFlipFromRight, .showHideTransitionViews], completion: nil)
@@ -77,4 +103,10 @@ class ViewController: UIViewController {
 
 
 }
+
+struct WordPair {
+    var wordToLearn: String
+    var translation: String
+}
+
 
