@@ -82,8 +82,10 @@ class ViewController: UIViewController {
             }
             recognizer.setTranslation(CGPoint.zero, in: self.view)
         } else if(state == 3) {
-            frontView.center = CGPoint(x:view.center.x, y:view.center.y)
-            backView.center = CGPoint(x:view.center.x, y:view.center.y)
+            UIView.animate(withDuration: 0.3, animations: {
+                self.frontView.center = CGPoint(x:self.view.center.x, y:self.view.center.y)
+                self.backView.center = CGPoint(x:self.view.center.x, y:self.view.center.y)
+            })
             recognizer.setTranslation(CGPoint.zero, in: self.view)
         }
     }
